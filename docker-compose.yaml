@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  sample:
+    image: "blackbox-testing-sample:${APPLICATION_VERSION:-latest}"
+    pull_policy: never
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1GB
+        reservations:
+          cpus: '1'
+          memory: 500M
