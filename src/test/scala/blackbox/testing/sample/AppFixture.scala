@@ -12,7 +12,7 @@ import org.testcontainers.containers.wait.strategy.Wait
 
 import java.io.File
 
-trait AppFixture[F[_]] extends TestContainersForAll with AppClient.Fixture[F] with BeforeAndAfterEach:
+trait AppFixture[F[_]] extends TestContainersForAll with AppClient.Fixture[F] with BeforeAndAfterEach {
   self: FixtureAsyncTestSuite =>
 
   override type Containers = DockerComposeContainer
@@ -40,3 +40,4 @@ trait AppFixture[F[_]] extends TestContainersForAll with AppClient.Fixture[F] wi
         )
       )
       .start()
+}
