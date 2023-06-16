@@ -2,7 +2,7 @@ import com.typesafe.sbt.packager.docker.*
 
 val http4sVersion = "0.23.20"
 
-lazy val root = project
+lazy val root = (project in file("."))
   .enablePlugins(JavaAppPackaging, DockerPlugin, GitVersioning)
   .settings(
     name := "blackbox-testing-sample",
