@@ -1,6 +1,7 @@
 package blackbox.testing.sample
 
 import cats.Eval
+import cats.effect.testing.scalatest.CatsResource
 import com.dimafeng.testcontainers.{DockerComposeContainer, ServiceLogConsumer, WaitingForService}
 import cats.syntax.all.*
 import com.dimafeng.testcontainers.scalatest.TestContainersForAll
@@ -12,13 +13,12 @@ import org.testcontainers.containers.wait.strategy.Wait
 
 import java.io.File
 
-trait AppFixture[F[_]] extends TestContainersForAll with AppClient.Fixture[F] with BeforeAndAfterEach {
+trait AppFixture extends TestContainersForAll, BeforeAndAfterEach, AppClient.Fixture {
   self: FixtureAsyncTestSuite =>
 
   override type Containers = DockerComposeContainer
 
   private val dockerComposeYaml = new File(
-    "it.app.dockerfile",
     scala.sys.props.getOrElse(
       "it.app.dockerfile",
       cancel("this suite requires the property it.app.dockerfile with a path to a valid docker-compose.yaml")
