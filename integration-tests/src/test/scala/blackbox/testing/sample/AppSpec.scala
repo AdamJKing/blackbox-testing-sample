@@ -8,13 +8,13 @@ import org.scalatest.featurespec.FixtureAsyncFeatureSpec
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.tags.Slow
 import org.scalatest.GivenWhenThen
-import scala.language.implicitConversions
+
+import scala.concurrent.Future
 
 @Slow
 class AppSpec extends FixtureAsyncFeatureSpec, AsyncIOSpec, AppFixture, GivenWhenThen {
-
   Feature("Application") {
-    Scenario("Message storage") { (client: AppClient[IO]) =>
+    Scenario("Message storage") { client =>
       for {
         _ <- IO(Given("the message is unset"))
         _ <- client.getMessage.asserting(_.shouldBe(empty))
@@ -24,7 +24,6 @@ class AppSpec extends FixtureAsyncFeatureSpec, AsyncIOSpec, AppFixture, GivenWhe
         _ <- client.getMessage.asserting(_.shouldBe("cool!"))
 
       } yield ()
-
     }
   }
 }

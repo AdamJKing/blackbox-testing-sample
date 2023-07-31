@@ -7,7 +7,7 @@ lazy val server = project
   .settings(
     name := "blackbox-testing-sample",
     ThisBuild / scalaVersion := "3.3.0",
-    scalacOptions ++= Seq("-release:11", "-no-indent", "-source:future", "-deprecation"),
+    scalacOptions ++= Seq("-release:11", "-no-indent", "-deprecation"),
     libraryDependencies ++=
       Seq(
         "org.http4s" %% "http4s-dsl" % http4sVersion,
@@ -24,9 +24,12 @@ lazy val server = project
 
 lazy val `integration-tests` = project
   .settings(
+    scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchecked"),
     publish / skip := true,
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0",
+      "org.scalatest" %% "scalatest-featurespec" % "3.2.15",
+      "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.15",
+      "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0",
       "org.http4s" %% "http4s-ember-client" % http4sVersion,
       "com.dimafeng" %% "testcontainers-scala-scalatest" % "0.40.12",
       "ch.qos.logback" % "logback-classic" % "1.4.7" % Runtime

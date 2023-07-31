@@ -34,7 +34,6 @@ object AppClient {
     * available when using `CatsResource[F, _]` directly.
     */
   trait Fixture extends CatsResourceIO[AppClient[IO]] { self: FixtureAsyncTestSuite =>
-    override type FixtureParam = AppClient[IO]
 
     /** Application URI; an `Eval` to allow inheritance and laziness.
       */
@@ -43,6 +42,4 @@ object AppClient {
     override val resource: Resource[IO, AppClient[IO]] =
       AppClient.resource[IO](appUri)(using ResourceAsync, Network.forAsync(ResourceAsync))
   }
-
-  trait FixtureIO extends CatsResourceIO[AppClient[IO]] { self: FixtureAsyncTestSuite => }
 }
