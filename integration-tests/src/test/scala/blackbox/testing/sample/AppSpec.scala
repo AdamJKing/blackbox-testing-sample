@@ -10,9 +10,14 @@ import org.scalatest.tags.Slow
 import org.scalatest.GivenWhenThen
 
 import scala.concurrent.Future
+import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.IntegrationPatience
+import org.scalatest.concurrent.PatienceConfiguration
+import scala.concurrent.ExecutionContext
+import cats.effect.unsafe.IORuntimeBuilder
 
 @Slow
-class AppSpec extends FixtureAsyncFeatureSpec, AsyncIOSpec, AppFixture, GivenWhenThen {
+class AppSpec extends FixtureAsyncFeatureSpec, AsyncIOSpec, AppFixture[IO], GivenWhenThen {
   Feature("Application") {
     Scenario("Message storage") { client =>
       for {

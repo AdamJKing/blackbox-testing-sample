@@ -1,20 +1,13 @@
 package blackbox.testing.sample
 
-import cats.Eval
 import cats.effect.testing.UnsafeRun
-import cats.effect.testing.scalatest.{CatsResource, CatsResourceIO}
-import cats.effect.{Async, Deferred, IO, Resource}
-import cats.syntax.all.*
+import cats.effect.{Async, Resource}
 import fs2.io.net.Network
 import org.http4s.Method.{GET, PUT}
+import org.http4s.Uri
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.ember.client.EmberClientBuilder
-import org.http4s.{Request, Response, Uri}
-import org.scalatest.Assertions.fail
-import org.scalatest.FixtureAsyncTestSuite
-
-import java.security.{KeyPair, KeyPairGenerator}
-import java.time.Instant
+import org.scalatest.{FixtureAsyncTestSuite, FutureOutcome, Outcome}
 
 trait AppClient[F[_]] {
   def putMessage(msg: String): F[Unit]
@@ -22,24 +15,31 @@ trait AppClient[F[_]] {
 }
 
 object AppClient {
-  def resource[F[_]: Async: Network](uri: Eval[Uri]): Resource[F, AppClient[F]] =
+  def resource[F[_]: Async: Network](uri: => Uri): Resource[F, AppClient[F]] =
     EmberClientBuilder.default[F].build.map { http =>
       new AppClient[F] with Http4sClientDsl[F] {
-        override def putMessage(msg: String): F[Unit] = http.expect(PUT(msg, uri.value / "message"))
-        override val getMessage: F[String] = http.expect(GET(uri.value / "message"))
+        override def putMessage(msg: String): F[Unit] = http.expect(PUT(msg, uri / "message"))
+        override val getMessage: F[String] = http.expect(GET(uri / "message"))
       }
     }
 
-  /** Locked to [[IO]] for simplicity as `CatsResourceIO` provides an `UnsafeRun[IO]` implementation that isn't
-    * available when using `CatsResource[F, _]` directly.
-    */
-  trait Fixture extends CatsResourceIO[AppClient[IO]] { self: FixtureAsyncTestSuite =>
+  // alternative fixture harness due to issues with the one CE provides
+  // https://github.com/typelevel/cats-effect-testing/issues/300
+  trait Fixture[F[_]: Async: UnsafeRun: Network] {
+    self: FixtureAsyncTestSuite =>
 
-    /** Application URI; an `Eval` to allow inheritance and laziness.
-      */
-    val appUri: Eval[Uri]
+    lazy val appUri: Uri
 
-    override val resource: Resource[IO, AppClient[IO]] =
-      AppClient.resource[IO](appUri)(using ResourceAsync, Network.forAsync(ResourceAsync))
+    private class CEOutcome(outcomeF: F[Outcome]) extends FutureOutcome(UnsafeRun[F].unsafeToFuture(outcomeF))
+
+    override type FixtureParam = AppClient[F]
+    override def withFixture(test: OneArgAsyncTest): FutureOutcome = CEOutcome {
+      AppClient.resource[F](appUri).use { client =>
+        Async[F].async_ { callback =>
+          withFixture(test.toNoArgAsyncTest(client))
+            .onCompletedThen(result => callback(result.toEither))
+        }
+      }
+    }
   }
 }

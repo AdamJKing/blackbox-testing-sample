@@ -1,6 +1,8 @@
 import com.typesafe.sbt.packager.docker.*
 
-val http4sVersion = "0.23.20"
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
+val http4sVersion = "0.23.23"
 
 lazy val server = project
   .enablePlugins(JavaAppPackaging, DockerPlugin, GitVersioning)

@@ -31,3 +31,5 @@ metals.sbt
 .idea_modules
 /.worksheet/
 /server/src/it/scala/blackbox/testing/sample/AppSpec.scala
+
+.scala-build
