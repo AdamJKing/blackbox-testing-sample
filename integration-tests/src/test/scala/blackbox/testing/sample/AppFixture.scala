@@ -32,7 +32,7 @@ trait AppFixture[F[_]: Async: UnsafeRun]
   )
 
   override lazy val appUri: Uri = withContainers { containers =>
-    Uri.unsafeFromString(s"http://${containers.getServiceHost("amdocs", 8080)}:8080")
+    Uri.unsafeFromString(s"http://${containers.getServiceHost("sample", 8080)}:8080")
   }
 
   override def startContainers(): DockerComposeContainer =
