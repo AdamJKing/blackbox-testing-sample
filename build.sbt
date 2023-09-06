@@ -37,5 +37,8 @@ lazy val `integration-tests` = project
       "ch.qos.logback" % "logback-classic" % "1.4.7" % Runtime
     ),
     Test / javaOptions += s"-Dit.app.dockerfile=${(ThisBuild / baseDirectory).value / "docker-compose.yaml"}",
-    Test / fork := true
+    Test / fork := true,
+    Test / test := (Test / test).dependsOn(server / Docker / publishLocal).value,
+    Test / testOnly := (Test / testOnly).dependsOn(server / Docker / publishLocal).evaluated,
+    Test / testQuick := (Test / testQuick).dependsOn(server / Docker / publishLocal).evaluated
   )
